@@ -1,6 +1,7 @@
 ﻿using INDWalks.API.Data;
 using INDWalks.API.Models.Domain;
 using INDWalks.API.Models.DTO;
+using INDWalks.API.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -14,9 +15,12 @@ namespace INDWalks.API.Controllers
     public class RegionsController : ControllerBase
     {
         private readonly INDWalksDbContext dbContext;
-        public RegionsController(INDWalksDbContext dbContext)
+        private readonly IRegionRepository regionRepository;
+
+        public RegionsController(INDWalksDbContext dbContext , IRegionRepository regionRepository)
         {
             this.dbContext = dbContext;
+            this.regionRepository = regionRepository;
         }
 
 
@@ -26,7 +30,7 @@ namespace INDWalks.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             //Get Data from Database Model
-            var regionsDomain = await dbContext.Regions.ToListAsync();
+            var regionsDomain = await regionRepository.GetAllAsync();
 
             //Map Domain Model to DTO
             var regionsDto = new List<RegionDto>();
@@ -52,7 +56,7 @@ namespace INDWalks.API.Controllers
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             //Get Data from Database Model
-            var regionDomain = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
+            var regionDomain = await regionRepository.GetByIdAsync(id);
 
             if (regionDomain == null) 
             {
@@ -86,8 +90,7 @@ namespace INDWalks.API.Controllers
             };
 
             // Use Domain Model to create Region
-            await dbContext.Regions.AddAsync(regionDomainModel);
-            await dbContext.SaveChangesAsync();
+            regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
 
             // Map Domain model back to DTO to show the created info to client
             var regionDto = new RegionDto
@@ -107,23 +110,23 @@ namespace INDWalks.API.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id,[FromBody] UpdateRegionRequestDto updateRegionRequestDto) 
         {
-            //Check if Region Exist
-            var regionDomainModel = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
+
+            //Map Dto to Domain Model
+            var regionDomainModel = new Region
+            {
+                Code = updateRegionRequestDto.Code,
+                Name = updateRegionRequestDto.Name,
+                RegionImageUrl = updateRegionRequestDto.RegionImageUrl
+            };
+
+            regionDomainModel = await regionRepository.UpdateAsync(id, regionDomainModel);
             
             if(regionDomainModel == null)
             {
                 return NotFound();
             }
 
-            //Map Dto to Domain Model to save the info in db which was updated by user
-            regionDomainModel.Code = updateRegionRequestDto.Code;
-            regionDomainModel.Name = updateRegionRequestDto.Name;
-            regionDomainModel.RegionImageUrl = updateRegionRequestDto.RegionImageUrl;
-
-            await dbContext.SaveChangesAsync();
-
             //Now Convert domain model back to dto to send the updated info to user 
-
             var regionDto = new RegionDto
             {
                 Id = regionDomainModel.Id,
@@ -141,16 +144,12 @@ namespace INDWalks.API.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id) 
         {
-            var regionDomainModel = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
+            var regionDomainModel = await regionRepository.DeleteAsync(id);
 
             if (regionDomainModel == null) 
             {
                 return NotFound();
             }
-
-            // Delete region
-            dbContext.Regions.Remove(regionDomainModel);
-            await dbContext.SaveChangesAsync();
 
             //To show user the deleted region , Map the domain model to Dto to show the deleted region to user
 
