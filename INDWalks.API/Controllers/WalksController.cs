@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using INDWalks.API.CustomActionFilters;
 using INDWalks.API.Models.Domain;
 using INDWalks.API.Models.DTO;
 using INDWalks.API.Repositories;
@@ -25,6 +26,7 @@ namespace INDWalks.API.Controllers
         // CREATE Walk
         // POST: /api/walks
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddWalkRequestDto addWalkRequestDto) 
         {
             //Map AddWalkRequestDto DTO  to Walk Domain Model
@@ -71,6 +73,7 @@ namespace INDWalks.API.Controllers
         // PUT: /api/Walks/{id}
         [HttpPut]
         [Route("{id:Guid}")]
+        [ValidateModel]
         public async Task<IActionResult> Update([FromRoute] Guid id, UpdateWalkRequestDto updateWalkRequestDto)
         {
             //Map Dto To Domain Model

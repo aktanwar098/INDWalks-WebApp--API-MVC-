@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using INDWalks.API.CustomActionFilters;
 using INDWalks.API.Data;
 using INDWalks.API.Models.Domain;
 using INDWalks.API.Models.DTO;
@@ -60,6 +61,7 @@ namespace INDWalks.API.Controllers
         // POST To Create New Region
         // POST: https://localhost:portnumber/api/regions
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto) 
         {
             // Map or Convert DTO to Domain Model
@@ -72,21 +74,22 @@ namespace INDWalks.API.Controllers
             var regionDto = mapper.Map<RegionDto>(regionDomainModel);
 
             return CreatedAtAction(nameof(GetById), new { id = regionDto.Id }, regionDto);
+
         }
 
         // Update Region
         // PUT: https://localhost:portnumber/api/regions/{id}
         [HttpPut]
         [Route("{id:Guid}")]
+        [ValidateModel]
         public async Task<IActionResult> Update([FromRoute] Guid id,[FromBody] UpdateRegionRequestDto updateRegionRequestDto) 
         {
-
             //Map Dto to Domain Model
             var regionDomainModel = mapper.Map<Region>(updateRegionRequestDto);
 
             regionDomainModel = await regionRepository.UpdateAsync(id, regionDomainModel);
-            
-            if(regionDomainModel == null)
+
+            if (regionDomainModel == null)
             {
                 return NotFound();
             }
