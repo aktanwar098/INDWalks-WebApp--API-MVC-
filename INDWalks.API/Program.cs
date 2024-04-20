@@ -18,6 +18,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<INDWalksDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("INDWalksConnectionString")));
 
+builder.Services.AddDbContext<INDWalksAuthDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("INDWalksAuthConnectionString")));
+
 builder.Services.AddScoped<IRegionRepository, SQLRegionRepository>();
 builder.Services.AddScoped<IWalkRepository, SQLWalkRepository>();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
