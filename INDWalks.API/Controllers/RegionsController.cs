@@ -20,12 +20,14 @@ namespace INDWalks.API.Controllers
         private readonly INDWalksDbContext dbContext;
         private readonly IRegionRepository regionRepository;
         private readonly IMapper mapper;
+        private readonly ILogger<RegionsController> logger;
 
-        public RegionsController(INDWalksDbContext dbContext , IRegionRepository regionRepository , IMapper mapper)
+        public RegionsController(INDWalksDbContext dbContext , IRegionRepository regionRepository , IMapper mapper ,ILogger<RegionsController> logger)
         {
             this.dbContext = dbContext;
             this.regionRepository = regionRepository;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
 
@@ -35,11 +37,11 @@ namespace INDWalks.API.Controllers
         [Authorize(Roles = "Reader")]
         public async Task<IActionResult> GetAll()
         {
-            //Get Data from Database Model
-            var regionsDomain = await regionRepository.GetAllAsync();
+                //Get Data from Database Model
+                var regionsDomain = await regionRepository.GetAllAsync();
 
-            //Return Dto
-            return Ok(mapper.Map<List<RegionDto>>(regionsDomain));
+                //Return Dto
+                return Ok(mapper.Map<List<RegionDto>>(regionsDomain));
         }
 
         // GET SINGLE REGION (Get Region By ID)
